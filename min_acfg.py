@@ -113,34 +113,35 @@ def find_coalition(structure, player):
     return [c for c in structure if player in c][0]
 
 
-def value_coalition(coalition, n, player, friends):
+def calc_value(coalition, n, player, friends):
     """
     calculate the value of the given coalition for the given player
     :param coalition: The coalition
     :param n: Number of players in the game
     :param player: The player to consider
-    :param friends: The network of friends
+    :param friends: The player's friends
     :return: The numerical value the player assigns to the coalition
     """
     v = 0
     for p in coalition:
         if p == player:
             continue
-        elif p in friends[player]:
+        elif p in friends:
             v += n
         else:
             v -= 1
     return v
 
 
-def utility(structure, n, player, friends, type='SF'):
+def calc_utility(structure, n, player, friends, type='SF'):
     M = n ** 2
 
     c = find_coalition(structure, player)
-    own_value = value_coalition(c, n, player, friends)
-    min_value_friends = min(
-        [value_coalition(find_coalition(structure, friend), n, friend, friends)
-         for friend in friends[player]])
+    own_value = calc_value(c, n, player, friends)
+    vs_friends = [calc_value(find_coalition(structure, friend), n, friend,
+                             friends[friend]) for friend in friends[player]]
+    min_value_friends = min(vs_friends) if len(vs_friends) != 0 else 0
+
     if type == 'SF':
         return M * own_value \
                + min_value_friends
@@ -161,8 +162,8 @@ def calculate_all_utilities(N, F, degree='SF'):
     for i, p in partitions:
         uts = []
         for player in N:
-            uts.append(utility(p, n, player, F, type=degree))
-        dic[Structure(freeze(p))] = uts
+            uts.append(calc_utility(p, n, player, F, type=degree))
+        dic[Structure(p)] = uts
     return dic
 
 
