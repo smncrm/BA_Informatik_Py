@@ -41,6 +41,19 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(min_acfg.Structure(g).move_coalition(c),
                          min_acfg.Structure(g_exp))
 
+    def test_calc_value_alone(self):
+        v = min_acfg.calc_value([1], 4, 1, [2,3])
+        self.assertEqual(v, 0)
+
+    def test_calc_value_alone_and_no_friends(self):
+        v = min_acfg.calc_value([1], 4, 1, [])
+        self.assertEqual(v, 0)
+
+    def test_calc_value_only_enemies(self):
+        n = 5
+        v = min_acfg.calc_value([1, 4, 5], n, 1, [2, 3])
+        self.assertEqual(v, -2)
+
     def test_number_of_possible_structures(self):
         n = 5
         N = range(n)
