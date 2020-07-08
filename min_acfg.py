@@ -1,24 +1,6 @@
 import itertools
 
 
-def freeze(struct):
-    """
-    Converts coalition structure to a frozenset to be hashable
-    :param struct: A collection of collections
-    :return: The frozenset version
-    """
-    return frozenset(map(frozenset, struct))
-
-
-def unfreeze(frozen_struct):
-    """
-    Converts a frozenset back to a mutable collection
-    :param frozen_struct: A frozen coalition structure
-    :return: A list object representing the structure
-    """
-    return list(map(list, frozen_struct))
-
-
 def remove_players(coalition, players_to_remove):
     """
     Removes all players from the coalition that are in players_to_remove
@@ -30,14 +12,14 @@ def remove_players(coalition, players_to_remove):
 
 
 class Structure:
-    def __init__(self, frozen_struct):
-        self.struct = frozen_struct
+    def __init__(self, collection):
+        self.struct = self.freeze(collection)
 
     def __str__(self):
-        return str(unfreeze(self.struct))
+        return str(self.unfreeze(self.struct))
 
     def __repr__(self):
-        return str(unfreeze(self.struct))
+        return str(self.unfreeze(self.struct))
 
     def __hash__(self):
         return self.struct.__hash__()
@@ -45,16 +27,33 @@ class Structure:
     def __eq__(self, other):
         return self.__hash__() == other.__hash__()
 
+    def freeze(self, struct):
+        """
+        Converts coalition structure to a frozenset to be hashable
+        :param struct: A collection of collections
+        :return: The frozenset version
+        """
+        return frozenset(map(frozenset, struct))
+
+    def unfreeze(self, frozen_struct):
+        """
+        Converts a frozenset back to a mutable collection
+        :param frozen_struct: A frozen coalition structure
+        :return: A list object representing the structure
+        """
+        return list(map(list, frozen_struct))
+
     def move_coalition(self, coalition):
         """
         Moves all players in coalition from their orginal coalition to form a new one.
         :param coalition: New coalition to form
         :return: The new coalition structure
         """
-        structure = unfreeze(self.struct)
-        new_structure = [remove_players(c, coalition) for c in structure]
+        structure = self.unfreeze(self.struct)
+        new_structure = [remove_players(c, coalition) for c in structure] \
+                        + [coalition]
         filtered = list(filter(None, new_structure))
-        return Structure(freeze(filtered + [coalition]))
+        return Structure(filtered)
 
     def check_blocking_coalition(self, dic, coalition):
         """
