@@ -172,3 +172,16 @@ def find_all_coalitions(N):
     for m in range(len(N) - 1):
         res += (list(itertools.combinations(N, m + 1)))
     return res
+
+
+def find_core_stable_coalition(N, F, dic=None, degree='SF'):
+    all_cs = find_all_coalitions(N)
+
+    if dic is None:
+        dic = calculate_all_utilities(N, F, degree=degree)
+
+    for struct in dic.keys():
+        if struct.is_core_stable(dic, all_cs):
+            return struct
+
+    return None
