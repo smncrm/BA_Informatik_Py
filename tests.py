@@ -54,6 +54,20 @@ class MyTestCase(unittest.TestCase):
         v = min_acfg.calc_value([1, 4, 5], n, 1, [2, 3])
         self.assertEqual(v, -2)
 
+    def test_compare_structures(self):
+        uts_g = [0,10,15,-5]
+        uts_d = [5,10,10,-10]
+
+        self.assertEqual(min_acfg.compare_structures(uts_g,uts_d), 1)
+
+    def test_compare_structures_eq(self):
+        uts_g = [0,10,15,-5]
+        uts_d = [5,10,10,-5]
+
+        self.assertEqual(min_acfg.compare_structures(uts_g,uts_d), 0)
+
+
+
     def test_number_of_possible_structures(self):
         n = 5
         N = range(n)

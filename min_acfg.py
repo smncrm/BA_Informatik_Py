@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 
 
 def remove_players(coalition, players_to_remove):
@@ -133,23 +134,23 @@ def calc_value(coalition, n, player, friends):
     return v
 
 
-def calc_utility(structure, n, player, friends, type='SF'):
+def calc_utility(structure, n, player, friends, degree='SF'):
     M = n ** 2
 
     c = find_coalition(structure, player)
-    own_value = calc_value(c, n, player, friends)
+    own_value = calc_value(c, n, player, friends[player])
     vs_friends = [calc_value(find_coalition(structure, friend), n, friend,
                              friends[friend]) for friend in friends[player]]
     min_value_friends = min(vs_friends) if len(vs_friends) != 0 else 0
 
-    if type == 'SF':
+    if degree == 'SF':
         return M * own_value \
                + min_value_friends
 
-    if type == 'EQ':
+    if degree == 'EQ':
         return min([own_value, min_value_friends])
 
-    if type == 'AL':
+    if degree == 'AL':
         return own_value \
                + M * min_value_friends
 
@@ -162,7 +163,7 @@ def calculate_all_utilities(N, F, degree='SF'):
     for i, p in partitions:
         uts = []
         for player in N:
-            uts.append(calc_utility(p, n, player, F, type=degree))
+            uts.append(calc_utility(p, n, player, F, degree=degree))
         dic[Structure(p)] = uts
     return dic
 
@@ -174,7 +175,7 @@ def find_all_coalitions(N):
     return res
 
 
-def find_core_stable_coalition(N, F, dic=None, degree='SF'):
+def find_core_stable_structure(N, F, dic=None, degree='SF'):
     all_cs = find_all_coalitions(N)
 
     if dic is None:
@@ -183,5 +184,26 @@ def find_core_stable_coalition(N, F, dic=None, degree='SF'):
     for struct in dic.keys():
         if struct.is_core_stable(dic, all_cs):
             return struct
+
+    return None
+
+
+def compare_structures(uts_gamma, uts_delta):
+    s = sum([np.sign(a - b) for a, b in zip(uts_gamma, uts_delta)])
+    return np.sign(s)
+
+
+def find_popular_structure(N, F, dic=None, degree='SF'):
+    if dic is None:
+        dic = calculate_all_utilities(N, F, degree=degree)
+
+    for struct1, uts1 in dic.items():
+        res = True
+        for struct2, uts2 in dic.items():
+            if compare_structures(uts1, uts2) < 0:
+                res = False
+                break
+        if res:
+            return struct1
 
     return None
