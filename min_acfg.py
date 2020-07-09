@@ -2,16 +2,6 @@ import itertools
 import numpy as np
 
 
-def remove_players(coalition, players_to_remove):
-    """
-    Removes all players from the coalition that are in players_to_remove
-    :param coalition: List representing a coalition
-    :param players_to_remove: List of players to remove
-    :return: The coalition without the removed players
-    """
-    return [p for p in coalition if p not in players_to_remove]
-
-
 class Structure:
     def __init__(self, collection):
         self.struct = self.freeze(collection)
@@ -103,6 +93,16 @@ def partition(collection):
             yield smaller[:n] + [[first] + subset] + smaller[n + 1:]
         # put `first` in its own subset
         yield [[first]] + smaller
+
+
+def remove_players(coalition, players_to_remove):
+    """
+    Removes all players from the coalition that are in players_to_remove
+    :param coalition: List representing a coalition
+    :param players_to_remove: List of players to remove
+    :return: The coalition without the removed players
+    """
+    return [p for p in coalition if p not in players_to_remove]
 
 
 def find_coalition(structure, player):
