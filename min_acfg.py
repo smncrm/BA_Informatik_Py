@@ -134,13 +134,22 @@ def calc_value(coalition, n, player, friends):
     return v
 
 
-def calc_utility(structure, n, player, friends, degree='SF'):
+def calc_utility(structure, n, player, F, degree='SF'):
+    """
+    Calculate the utility of a given structure for the given player
+    :param structure: A coalition structure
+    :param n: The number of players in total
+    :param player: The player to consider
+    :param F: The network of friends
+    :param degree: The degree of altruism to use
+    :return: The numerical utility the player assigns to the structure
+    """
     M = n ** 2
 
     c = find_coalition(structure, player)
-    own_value = calc_value(c, n, player, friends[player])
+    own_value = calc_value(c, n, player, F[player])
     vs_friends = [calc_value(find_coalition(structure, friend), n, friend,
-                             friends[friend]) for friend in friends[player]]
+                             F[friend]) for friend in F[player]]
     min_value_friends = min(vs_friends) if len(vs_friends) != 0 else 0
 
     if degree == 'SF':
@@ -156,6 +165,15 @@ def calc_utility(structure, n, player, friends, degree='SF'):
 
 
 def calculate_all_utilities(N, F, degree='SF'):
+    """
+    Calculate a dict containing all possible structure and their utilities for
+    each player
+    :param N: The set of players
+    :param F: The network of friends
+    :param degree: The degree of altruism
+    :return: A dict with all possible structures as keys and list of utilities
+    as values
+    """
     n = len(N)
     partitions = enumerate(partition(list(N)), 1)
     dic = dict()
@@ -169,6 +187,11 @@ def calculate_all_utilities(N, F, degree='SF'):
 
 
 def find_all_coalitions(N):
+    """
+    Find all subsets of the set of players.
+    :param N: The set of players
+    :return: A list containing all possible coalitions
+    """
     res = []
     for m in range(len(N) - 1):
         res += (list(itertools.combinations(N, m + 1)))
@@ -176,6 +199,15 @@ def find_all_coalitions(N):
 
 
 def find_core_stable_structure(N, F, dic=None, degree='SF'):
+    """
+    Checks all possible structures for the ACFG for a core-stable one.
+    :param N: The set of players
+    :param F: The network of friends
+    :param dic: The dict containing all structures and utilities. If 'None', it
+                is computed.
+    :param degree: The degree of altruism
+    :return: The first core-stable structure in dic or 'None' if none exists
+    """
     all_cs = find_all_coalitions(N)
 
     if dic is None:
@@ -189,20 +221,45 @@ def find_core_stable_structure(N, F, dic=None, degree='SF'):
 
 
 def compare_structures(uts_gamma, uts_delta):
+    """
+    Compare two structures regarding their popularity.
+    :param uts_gamma: The utilities of the first structure
+    :param uts_delta: The utilities of the second structure
+    :return: 1 (-1) if Gamma (Delta) is more popular. 0 if equally popular.
+    """
     s = sum([np.sign(a - b) for a, b in zip(uts_gamma, uts_delta)])
     return np.sign(s)
 
 
-def find_popular_structure(N, F, dic=None, degree='SF'):
+def find_popular_structure(N, F, dic=None, degree='SF', strict=False):
+    """
+    Checks all possible structures for the ACFG for a (strictly) popular one.
+    :param N: The set of players
+    :param F: The network of friends
+    :param dic: The dict containing all structures and utilities. If 'None', it
+                is computed.
+    :param degree: The degree of altruism
+    :param strict: If True, checks for a strictly popular structure
+    :return: The first (strictly) popular structure in dic or 'None' if none
+             exists
+    """
     if dic is None:
         dic = calculate_all_utilities(N, F, degree=degree)
 
     for struct1, uts1 in dic.items():
         res = True
         for struct2, uts2 in dic.items():
-            if compare_structures(uts1, uts2) < 0:
-                res = False
-                break
+            if struct1 == struct2:
+                continue
+            if strict:
+                if compare_structures(uts1, uts2) != 1:
+                    res = False
+                    break
+            else:
+                if compare_structures(uts1, uts2) < 0:
+                    res = False
+                    break
+
         if res:
             return struct1
 

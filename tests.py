@@ -42,7 +42,7 @@ class MyTestCase(unittest.TestCase):
                          min_acfg.Structure(g_exp))
 
     def test_calc_value_alone(self):
-        v = min_acfg.calc_value([1], 4, 1, [2,3])
+        v = min_acfg.calc_value([1], 4, 1, [2, 3])
         self.assertEqual(v, 0)
 
     def test_calc_value_alone_and_no_friends(self):
@@ -55,41 +55,16 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(v, -2)
 
     def test_compare_structures(self):
-        uts_g = [0,10,15,-5]
-        uts_d = [5,10,10,-10]
+        uts_g = [0, 10, 15, -5]
+        uts_d = [5, 10, 10, -10]
 
-        self.assertEqual(min_acfg.compare_structures(uts_g,uts_d), 1)
+        self.assertEqual(min_acfg.compare_structures(uts_g, uts_d), 1)
 
     def test_compare_structures_eq(self):
-        uts_g = [0,10,15,-5]
-        uts_d = [5,10,10,-5]
+        uts_g = [0, 10, 15, -5]
+        uts_d = [5, 10, 10, -5]
 
-        self.assertEqual(min_acfg.compare_structures(uts_g,uts_d), 0)
-
-
-
-    def test_number_of_possible_structures(self):
-        n = 5
-        N = range(n)
-        F = dict(zip(N, [[]]*n))
-        dic = min_acfg.calculate_all_utilities(N, F)
-
-        self.assertEqual(len(dic.keys()), bell_number(n))
-
-
-def bell_number(n):
-    bell = [[0 for i in range(n + 1)] for j in range(n + 1)]
-    bell[0][0] = 1
-    for i in range(1, n + 1):
-
-        # Explicitly fill for j = 0
-        bell[i][0] = bell[i - 1][i - 1]
-
-        # Fill for remaining values of j
-        for j in range(1, i + 1):
-            bell[i][j] = bell[i - 1][j - 1] + bell[i][j - 1]
-
-    return bell[n][0]
+        self.assertEqual(min_acfg.compare_structures(uts_g, uts_d), 0)
 
 
 if __name__ == '__main__':
