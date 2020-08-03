@@ -163,7 +163,7 @@ def calc_utility(structure, n, player, F, degree='SF'):
                + M * min_value_friends
 
 
-def calculate_all_utilities(N, F, degree='SF'):
+def calc_all_utilities(N, F, degree='SF'):
     """
     calculates a dict containing all possible structure and their
     utilities for each player.
@@ -211,7 +211,7 @@ def find_core_stable_structure(N, F, dic=None, degree='SF'):
     all_cs = find_all_coalitions(N)
 
     if dic is None:
-        dic = calculate_all_utilities(N, F, degree=degree)
+        dic = calc_all_utilities(N, F, degree=degree)
 
     for struct in dic.keys():
         if struct.is_core_stable(dic, all_cs):
@@ -244,7 +244,7 @@ def find_popular_structure(N, F, dic=None, degree='SF', strict=False):
              exists.
     """
     if dic is None:
-        dic = calculate_all_utilities(N, F, degree=degree)
+        dic = calc_all_utilities(N, F, degree=degree)
 
     for struct1, uts1 in dic.items():
         res = True
