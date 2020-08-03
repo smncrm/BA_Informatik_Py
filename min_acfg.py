@@ -20,25 +20,26 @@ class Structure:
 
     def freeze(self, struct):
         """
-        Converts coalition structure to a frozenset to be hashable
-        :param struct: A collection of collections
-        :return: The frozenset version
+        converts coalition structure to a frozenset to be hashable.
+        :param struct: A collection of collections.
+        :return: The frozenset version.
         """
         return frozenset(map(frozenset, struct))
 
     def unfreeze(self, frozen_struct):
         """
-        Converts a frozenset back to a mutable collection
-        :param frozen_struct: A frozen coalition structure
-        :return: A list object representing the structure
+        converts a frozenset back to a mutable collection.
+        :param frozen_struct: A frozen coalition structure.
+        :return: A list object representing the structure.
         """
         return list(map(list, frozen_struct))
 
     def move_coalition(self, coalition):
         """
-        Moves all players in coalition from their orginal coalition to form a new one.
-        :param coalition: New coalition to form
-        :return: The new coalition structure
+        moves all players in coalition from their original coalition to
+        form a new one.
+        :param coalition: The new coalition to form.
+        :return: The new coalition structure.
         """
         structure = self.unfreeze(self.struct)
         new_structure = [remove_players(c, coalition) for c in structure] \
@@ -48,25 +49,22 @@ class Structure:
 
     def check_blocking_coalition(self, dic, coalition):
         """
-        checks whether the given coalition blocks the structure
-        :param dic: Dictionary containing all utilities for all structures
-        :param coalition: The coalition to check
-        :return: True if the coalition actually blocks the structure
+        checks whether the given coalition blocks the structure.
+        :param dic: Dictionary containing all utilities for all structures.
+        :param coalition: The coalition to check.
+        :return: True if the coalition actually blocks the structure.
         """
         new_structure = self.move_coalition(coalition)
-        res = True
 
         for p in coalition:
             if dic[self][p] >= dic[new_structure][p]:
-                res = False
-                break
-
-        return res
+                return False
+        return True
 
     def is_core_stable(self, dic, all_cs):
         """
-        checks whether the structure is core stable
-        :param dic: Dictionary containing all utilities for all structures
+        checks whether the structure is core stable.
+        :param dic: Dictionary containing all utilities for all structures.
         :param all_cs: List of all possible coalitions
         :return: True if the structure is core stable
         """
@@ -79,8 +77,8 @@ class Structure:
 def partition(collection):
     """
     https://stackoverflow.com/questions/19368375/set-partitions-in-python
-    :param collection: A collection to partition
-    :return: A collection of all possible partitions of the collection
+    :param collection: A collection.
+    :return: A collection of all possible partitions of the collection.
     """
     if len(collection) == 1:
         yield [collection]
@@ -97,31 +95,32 @@ def partition(collection):
 
 def remove_players(coalition, players_to_remove):
     """
-    Removes all players from the coalition that are in players_to_remove
-    :param coalition: List representing a coalition
-    :param players_to_remove: List of players to remove
-    :return: The coalition without the removed players
+    removes all players from the coalition that are in players_to_remove.
+    :param coalition: List representing a coalition.
+    :param players_to_remove: List of players to remove.
+    :return: The coalition without the removed players.
     """
     return [p for p in coalition if p not in players_to_remove]
 
 
 def find_coalition(structure, player):
     """
-    :param structure: The coalition structure
-    :param player: The player to find
-    :return: The coalition containing the player
+    finds the coalition that contains the given player.
+    :param structure: The coalition structure.
+    :param player: The player to find.
+    :return: The coalition containing the player.
     """
     return [c for c in structure if player in c][0]
 
 
 def calc_value(coalition, n, player, friends):
     """
-    calculate the value of the given coalition for the given player
-    :param coalition: The coalition
-    :param n: Number of players in the game
-    :param player: The player to consider
-    :param friends: The player's friends
-    :return: The numerical value the player assigns to the coalition
+    calculates the value of the given coalition for the given player.
+    :param coalition: The coalition.
+    :param n: Number of players in the game.
+    :param player: The player to consider.
+    :param friends: The player's friends.
+    :return: The numerical value the player assigns to the coalition.
     """
     v = 0
     for p in coalition:
@@ -136,13 +135,13 @@ def calc_value(coalition, n, player, friends):
 
 def calc_utility(structure, n, player, F, degree='SF'):
     """
-    Calculate the utility of a given structure for the given player
-    :param structure: A coalition structure
-    :param n: The number of players in total
-    :param player: The player to consider
-    :param F: The network of friends
-    :param degree: The degree of altruism to use
-    :return: The numerical utility the player assigns to the structure
+    calculates the utility of a given structure for the given player.
+    :param structure: A coalition structure.
+    :param n: The number of players in total.
+    :param player: The player to consider.
+    :param F: The network of friends.
+    :param degree: The degree of altruism to use.
+    :return: The numerical utility the player assigns to the structure.
     """
     M = n ** 2
 
@@ -166,13 +165,13 @@ def calc_utility(structure, n, player, F, degree='SF'):
 
 def calculate_all_utilities(N, F, degree='SF'):
     """
-    Calculate a dict containing all possible structure and their utilities for
-    each player
-    :param N: The set of players
-    :param F: The network of friends
-    :param degree: The degree of altruism
-    :return: A dict with all possible structures as keys and list of utilities
-    as values
+    calculates a dict containing all possible structure and their
+    utilities for each player.
+    :param N: The set of players.
+    :param F: The network of friends.
+    :param degree: The degree of altruism.
+    :return: A dict with all possible structures as keys and the
+             respective list of utilities of each player as values.
     """
     n = len(N)
     partitions = enumerate(partition(list(N)), 1)
@@ -188,9 +187,9 @@ def calculate_all_utilities(N, F, degree='SF'):
 
 def find_all_coalitions(N):
     """
-    Find all subsets of the set of players.
-    :param N: The set of players
-    :return: A list containing all possible coalitions
+    finds all subsets of the set of players.
+    :param N: The set of players.
+    :return: A list containing all possible coalitions.
     """
     res = []
     for m in range(len(N) - 1):
@@ -200,13 +199,14 @@ def find_all_coalitions(N):
 
 def find_core_stable_structure(N, F, dic=None, degree='SF'):
     """
-    Checks all possible structures for the ACFG for a core-stable one.
-    :param N: The set of players
-    :param F: The network of friends
-    :param dic: The dict containing all structures and utilities. If 'None', it
-                is computed.
-    :param degree: The degree of altruism
-    :return: The first core-stable structure in dic or 'None' if none exists
+    checks all possible coalition structures in the given ACFG
+    for a core-stable coalition structure.
+    :param N: The set of players.
+    :param F: The network of friends.
+    :param dic: The dict containing all structures and utilities.
+                If 'None', it is computed.
+    :param degree: The degree of altruism.
+    :return: The first core-stable structure in dic or 'None' if none exists.
     """
     all_cs = find_all_coalitions(N)
 
@@ -222,9 +222,9 @@ def find_core_stable_structure(N, F, dic=None, degree='SF'):
 
 def compare_structures(uts_gamma, uts_delta):
     """
-    Compare two structures regarding their popularity.
-    :param uts_gamma: The utilities of the first structure
-    :param uts_delta: The utilities of the second structure
+    compares two structures regarding their popularity.
+    :param uts_gamma: The utilities of the first structure.
+    :param uts_delta: The utilities of the second structure.
     :return: 1 (-1) if Gamma (Delta) is more popular. 0 if equally popular.
     """
     s = sum([np.sign(a - b) for a, b in zip(uts_gamma, uts_delta)])
@@ -233,15 +233,15 @@ def compare_structures(uts_gamma, uts_delta):
 
 def find_popular_structure(N, F, dic=None, degree='SF', strict=False):
     """
-    Checks all possible structures for the ACFG for a (strictly) popular one.
-    :param N: The set of players
-    :param F: The network of friends
-    :param dic: The dict containing all structures and utilities. If 'None', it
-                is computed.
+    checks all possible structures for the ACFG for a (strictly) popular one.
+    :param N: The set of players.
+    :param F: The network of friends.
+    :param dic: The dict containing all structures and utilities.
+                If 'None', it is computed.
     :param degree: The degree of altruism
-    :param strict: If True, checks for a strictly popular structure
+    :param strict: If True, checks for a strictly popular structure.
     :return: The first (strictly) popular structure in dic or 'None' if none
-             exists
+             exists.
     """
     if dic is None:
         dic = calculate_all_utilities(N, F, degree=degree)
