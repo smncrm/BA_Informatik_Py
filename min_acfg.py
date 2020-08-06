@@ -61,16 +61,39 @@ class Structure:
                 return False
         return True
 
-    def is_core_stable(self, dic, all_cs):
+    def check_weakly_blocking_coalition(self, dic, coalition):
+        """
+        checks whether the given coalition weakly blocks the structure.
+        :param dic: Dictionary containing all utilities for all structures.
+        :param coalition: The coalition to check.
+        :return: True if the coalition actually weakly blocks the structure.
+        """
+        new_structure = self.move_coalition(coalition)
+
+        happier_player_flag = False
+
+        for p in coalition:
+            if dic[self][p] > dic[new_structure][p]:
+                return False
+            if dic[self][p] < dic[new_structure][p]:
+                happier_player_flag = True
+        return happier_player_flag
+
+    def is_core_stable(self, dic, all_cs, strict=False):
         """
         checks whether the structure is core stable.
         :param dic: Dictionary containing all utilities for all structures.
-        :param all_cs: List of all possible coalitions
-        :return: True if the structure is core stable
+        :param all_cs: List of all possible coalitions.
+        :param strict: True when looking for strict core stability.
+        :return: True if the structure is core stable.
         """
         for c in all_cs:
-            if self.check_blocking_coalition(dic, c):
-                return False
+            if strict:
+                if self.check_weakly_blocking_coalition(dic, c):
+                    return False
+            else:
+                if self.check_blocking_coalition(dic, c):
+                    return False
         return True
 
 
@@ -197,7 +220,7 @@ def find_all_coalitions(N):
     return res
 
 
-def find_core_stable_structure(N, F, dic=None, degree='SF'):
+def find_core_stable_structure(N, F, dic=None, degree='SF', strict=False):
     """
     checks all possible coalition structures in the given ACFG
     for a core-stable coalition structure.
@@ -206,6 +229,7 @@ def find_core_stable_structure(N, F, dic=None, degree='SF'):
     :param dic: The dict containing all structures and utilities.
                 If 'None', it is computed.
     :param degree: The degree of altruism.
+    :param strict: True when looking for a strict core stable structure.
     :return: The first core-stable structure in dic or 'None' if none exists.
     """
     all_cs = find_all_coalitions(N)
@@ -214,7 +238,7 @@ def find_core_stable_structure(N, F, dic=None, degree='SF'):
         dic = calc_all_utilities(N, F, degree=degree)
 
     for struct in dic.keys():
-        if struct.is_core_stable(dic, all_cs):
+        if struct.is_core_stable(dic, all_cs, strict=strict):
             return struct
 
     return None
@@ -238,7 +262,7 @@ def find_popular_structure(N, F, dic=None, degree='SF', strict=False):
     :param F: The network of friends.
     :param dic: The dict containing all structures and utilities.
                 If 'None', it is computed.
-    :param degree: The degree of altruism
+    :param degree: The degree of altruism.
     :param strict: If True, checks for a strictly popular structure.
     :return: The first (strictly) popular structure in dic or 'None' if none
              exists.
